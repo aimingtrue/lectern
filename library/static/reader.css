@@ -1,0 +1,231 @@
+/* 朗读页：歌词式，永远深色。左栏书页段落（当前句高亮、逐词点亮、难词中文浮在词上）· 右栏连续译文 · E 讲解栏 */
+html,body{height:100%;overflow:hidden}
+/* 全屏时鼠标停 2 秒就藏起来，一动就出现（still 由 reader/main.js 按指针动静加减）；退出全屏恢复 */
+html.still:fullscreen,html.still:fullscreen *,html.still:-webkit-full-screen,html.still:-webkit-full-screen *{cursor:none!important}
+.rd{position:fixed;inset:0;display:flex;background:#151413;color:#fff;
+  --rx:min(62%,calc(clamp(28px,7vw,110px) + 960px));   /* 右栏（译文、人物图）的左边：正文列最宽 900px，屏幕更宽时右栏跟着靠过来，不留大片空白 */
+  --lx:#fff;--lx2:rgba(255,255,255,.72);--lx3:rgba(255,255,255,.42);--lxg:#e8c88a;--lxb:rgba(255,255,255,.1);--lxp:#1d1c1a}
+.ib{border:1px solid transparent;background:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:13.5px;color:var(--lx2);white-space:nowrap}
+.ib:hover{background:var(--lxb);color:var(--lx)}
+a.ib{text-decoration:none}
+.ib.on{background:rgba(255,255,255,.16);color:var(--lx)}
+.slide{flex:1;min-width:0;position:relative;overflow:hidden;container-type:inline-size}
+.lx-left{position:absolute;z-index:3;left:clamp(16px,3vw,48px);top:18px;max-width:calc(100% - clamp(16px,3vw,48px) * 2 - 560px);display:flex;gap:10px;align-items:center}
+/* 正文栏窄（讲解栏开着、小窗口）：先去掉书名，再窄连章节也不放，给右上角的工具让位 */
+@container (max-width:860px){.lx-top .lx-t{display:none} .lx-left{max-width:calc(100% - 32px - 470px)}}
+@container (max-width:640px){.lx-left{display:none}}
+.lx-top{min-width:0;display:flex;gap:14px;align-items:baseline;overflow:hidden;white-space:nowrap;color:var(--lx3);font:500 13px var(--ui);letter-spacing:.06em;text-decoration:none;transition:color .3s}
+.lx-top:hover{color:var(--lx)}
+.lx-top .lx-t{color:var(--lx2);overflow:hidden;text-overflow:ellipsis}
+/* 右上角工具：播放 · 音色 ｜ 目录 · 讲解 · Aa ｜ 全屏 · 退出，平时很淡，鼠标移上来才清楚 */
+.lx-tools{position:absolute;z-index:3;right:clamp(16px,3vw,48px);top:14px;display:flex;align-items:center;opacity:.45;transition:opacity .3s}
+.lx-tools:hover{opacity:1}
+.lx-tools .grp{display:flex;align-items:center;gap:2px}
+.lx-tools .grp+.grp{margin-left:8px;padding-left:8px;border-left:1px solid var(--lxb)}
+.lx-tools .grp[hidden]{display:none}
+/* 左下角状态：一行淡字。名字在左列里省略；本章、全书各占固定宽度，不跟着名字左右挪 */
+.status{position:absolute;z-index:3;left:clamp(28px,7vw,110px);right:clamp(28px,7vw,110px);bottom:22px;
+  display:flex;align-items:baseline;gap:18px;font-size:12px;line-height:1.4;color:var(--lx3);opacity:.42;transition:opacity .3s;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.status:hover{opacity:.88}
+.status[hidden]{display:none}
+.st-main{flex:1;min-width:0;display:flex;align-items:baseline;gap:12px;overflow:hidden}
+#st-who{min-width:0;overflow:hidden;text-overflow:ellipsis}
+#st-who .g{display:inline-flex;width:11px;height:12px;margin-right:5px;vertical-align:-1px}
+#st-who .g svg{width:11px;height:12px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round}
+#st-who b{font-weight:400}
+#st-who .role{margin-left:8px}
+#st-pace{display:inline-flex;gap:8px;flex:none}
+#st-today{flex:none;color:inherit;text-decoration:none}
+#st-today:hover{color:var(--lx)}
+#st-today .of{margin-left:8px}
+#st-pace:empty,#st-today:empty,#tts-state:empty{display:none}
+#tts-state:not(:empty){flex:none}
+#st-len{flex:none;display:flex;gap:16px}
+#st-len:empty{display:none}
+.meter{width:12em;text-align:right}
+/* 对白句：句首一小条按人物固定颜色的色条（library/speech.py 归属的说话人） */
+.ln.q::before{content:"";display:inline-block;width:3px;height:.8em;margin:0 .22em 0 0;border-radius:2px;background:var(--qc,#fff);opacity:.5;vertical-align:-.06em}
+/* 左栏：自己不滚，整列用 transform 平移（见 reader.js「平滑跟随」） */
+.sub{position:absolute;inset:0;z-index:2;overflow:hidden;touch-action:none;padding:0 clamp(28px,7vw,110px);
+  -webkit-mask-image:linear-gradient(transparent,#000 18%,#000 68%,transparent 90%);mask-image:linear-gradient(transparent,#000 18%,#000 68%,transparent 90%)}
+.sub[hidden]{display:none}
+#sub-list{--k:1;position:relative;max-width:900px;will-change:transform}
+/* 书页段落：句子连成整段、首行缩进，左侧标页码；当前段清楚，前后段落变淡但能读。强调只动透明度，不动尺寸和排版 */
+.sp{position:relative;margin:0 0 1.15em;font-family:var(--serif);font-weight:600;font-size:calc(clamp(24px,2.5vw,33px) * var(--k));line-height:1.72;
+  text-indent:1.6em;color:var(--lx);opacity:.22;transition:opacity .8s ease;text-wrap:pretty}
+.sp.prev{opacity:.34} .sp.here{opacity:1} .sp.far{opacity:.1}
+.sp.head{text-indent:0;font-size:calc(clamp(28px,3vw,40px) * var(--k));letter-spacing:.03em}
+/* 中文段落：宋体优先、首行缩进两字、字重轻一点、两端对齐；句子之间不加空格 */
+.sp.zh{font-family:"Songti SC","STSong","Noto Serif CJK SC","Source Han Serif SC",serif;font-weight:500;text-indent:2em;text-align:justify;line-height:1.85}
+.sp.zh.head{text-indent:0;letter-spacing:.08em}
+.excard .en:lang(zh-CN){font-family:"Songti SC","STSong",serif}
+.wd.zw{cursor:default}
+.sp .pg{position:absolute;right:calc(100% + 16px);top:.6em;text-indent:0;font:500 11.5px var(--ui);color:var(--lx3);letter-spacing:.04em;white-space:nowrap}
+.ln{cursor:pointer;transition:opacity .6s ease}
+.sp.here .ln{opacity:.36}
+.sp.here .ln.cur{opacity:1;cursor:default}
+html:not(.still) .ln:not(.cur):hover{opacity:.7!important}   /* 指针停着不动时不点亮：正文从它下面滑过会像第二处高亮 */
+.ln .gl{position:relative;text-decoration:underline 1px rgba(232,200,138,.55);text-underline-offset:.2em}
+.ln .gl .gt{position:absolute;left:50%;bottom:calc(100% - .2em);transform:translateX(-50%);white-space:nowrap;text-indent:0;font:500 max(12px,.36em)/1 var(--ui);font-style:normal;color:var(--lxg);letter-spacing:.04em;opacity:0;transition:opacity .5s .1s;pointer-events:none}
+.ln.open .gl .gt{opacity:.95}
+/* 逐词高亮（参考 NTU caption）：当前句未读稍暗，读过纯白，正在读的词最亮带柔光 */
+.ln.cur .en{color:rgba(255,255,255,.66)}
+.ln.cur .w{transition:color .22s,text-shadow .22s}
+.ln.cur .w.lit{color:#fff}
+.ln.cur .w.now{color:#fff;text-shadow:0 0 16px rgba(255,232,190,.6),0 0 2px rgba(255,255,255,.5)}
+/* 右侧译文：读过的句子按顺序连成一列，和左栏一样整列平移（见 reader.js「平滑跟随」）；
+   当前句译文宽屏放在正在读的那一行同一高度（38%），窄屏右栏固定在下方。读过的变淡，指上去变清楚 */
+.lx-side{position:absolute;z-index:2;left:clamp(20px,6vw,80px);right:clamp(20px,6vw,80px);bottom:64px;height:28vh;overflow:hidden;touch-action:none;
+  -webkit-mask-image:linear-gradient(transparent,#000 12%,#000 82%,transparent);mask-image:linear-gradient(transparent,#000 12%,#000 82%,transparent)}
+#side-list{position:relative;will-change:transform}
+.si{padding-top:.3em;margin-bottom:1.4em;opacity:.3;transition:opacity .6s ease}
+.si.cur{opacity:1}
+.si:not(.cur):hover{opacity:.8}
+.si .zh{font:400 clamp(16px,1.45vw,21px)/1.7 var(--ui);color:var(--lx2);max-width:46em}
+.si .zh.k{color:var(--lx3)}
+.si .zg{color:var(--lx);text-decoration:underline 1px rgba(232,200,138,.6);text-underline-offset:.3em}
+.si .nt{margin-top:.5em;font:400 13.5px/1.65 var(--ui);color:var(--lx3);max-width:52em;padding-left:12px;border-left:1px solid rgba(255,255,255,.18)}
+@media (min-width:901px){
+  .status{right:calc(100% - var(--rx) + 24px)}   /* 状态栏只占左栏，不压到右栏的译文、导图 */
+  .sub{padding-right:calc(100% - var(--rx) + 24px)}
+  .lx-side{left:var(--rx);right:clamp(28px,5vw,80px);top:0;bottom:0;height:auto;
+    -webkit-mask-image:linear-gradient(transparent,#000 18%,#000 76%,transparent 94%);mask-image:linear-gradient(transparent,#000 18%,#000 76%,transparent 94%)}
+  .si .zh{font-size:clamp(17px,1.5vw,22px)}
+}
+/* 人物关系图（reader.js「人物关系图」）：宽屏时放在右栏译文下方，占右栏 52% 高度以下；开着时译文列在那以下淡出，给它让位 */
+.cast{position:absolute;z-index:3;left:var(--rx);right:clamp(24px,3vw,56px);top:52%;bottom:56px;display:none;transition:opacity .6s}
+.cast.stale{opacity:.55}
+@media (min-width:901px){
+  .rd.cast-on .cast:not([hidden]){display:block}
+  .rd.cast-on .lx-side{-webkit-mask-image:linear-gradient(transparent,#000 18%,#000 43%,transparent 51%);mask-image:linear-gradient(transparent,#000 18%,#000 43%,transparent 51%)}
+}
+/* 白话书（母语，不译）：右栏没有译文，导图占满整栏 */
+.rd.mode-zh .lx-side{display:none}
+.rd.mode-zh .cast{top:72px}
+.cast svg{width:100%;height:calc(100% - 56px);overflow:visible;font-family:var(--ui)}
+.cast .cap{position:absolute;left:0;right:0;bottom:0;height:52px;overflow:hidden;font-size:13px;line-height:1.6;color:var(--lx3);padding-right:48px}
+.cast .cap b{color:var(--lx2);font-weight:600;margin-right:6px}
+.cast .cap i{font-style:normal;color:var(--lxg);margin-right:6px}
+.cast .cap .to{color:var(--lx3)}
+.cast .cap .n{position:absolute;right:0;top:0;font-size:12px;color:var(--lx3);opacity:.7}
+.cast .nd{cursor:pointer}
+.cast .nd circle{fill:rgba(255,255,255,.2);transition:fill .5s,filter .5s}
+.cast .nd text{fill:var(--lx3);font-size:13px;text-anchor:middle;pointer-events:none;transition:fill .5s;paint-order:stroke;stroke:#151413;stroke-width:3px;stroke-linejoin:round}
+.cast .nd .nr{fill:none;stroke:rgba(232,200,138,.5);stroke-width:1;stroke-dasharray:3 3}   /* 叙述者 */
+.cast .nd.near circle{fill:rgba(255,255,255,.45)} .cast .nd.near text{fill:var(--lx2)}
+.cast .nd.said circle{fill:rgba(255,255,255,.8)} .cast .nd.said text{fill:#fff}
+.cast .nd.on circle{fill:var(--lxg);filter:drop-shadow(0 0 10px rgba(232,200,138,.75))} .cast .nd.on text{fill:#fff;font-weight:600}
+.cast .nd.pin circle{stroke:#fff;stroke-width:1.5}
+.cast .ed{stroke:rgba(255,255,255,.09);stroke-width:1;transition:stroke .5s,stroke-width .5s}
+.cast .ed.near{stroke:rgba(255,255,255,.3)} .cast .ed.on{stroke:rgba(232,200,138,.85);stroke-width:1.8}
+.cast .el{fill:transparent;font-size:11px;text-anchor:middle;pointer-events:none;transition:fill .5s;paint-order:stroke;stroke:#151413;stroke-width:3px}
+.cast .el.near{fill:var(--lx3)} .cast .el.on{fill:var(--lxg)}
+@keyframes cpulse{0%{r:var(--r)}40%{r:calc(var(--r) * 1.9)}100%{r:var(--r)}}
+.cast .nd.pulse circle{animation:cpulse .7s ease-out}
+@keyframes cripple{0%{r:6;opacity:.8}100%{r:34;opacity:0}}
+.cast .ring{fill:none;stroke:var(--lxg);stroke-width:1.5;opacity:0;pointer-events:none}
+.cast .ring.go{animation:cripple .9s ease-out}
+.ctip{position:fixed;z-index:40;pointer-events:none;background:var(--lxp);border:1px solid var(--lxb);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--lx2);opacity:0;transition:opacity .2s;white-space:nowrap;max-width:320px}
+.ctip b{display:block;color:#fff;font-size:13px}
+/* 提示（扫描版 / 载入失败）：一行说明 + 操作 */
+.msg{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;justify-content:center;max-width:460px;margin:0 auto;padding:0 28px;font-size:14px;color:var(--lx2)}
+.msg[hidden]{display:none}
+.msg .pp-t{font:600 24px/1.45 var(--serif);color:var(--lx);margin-bottom:22px}
+.msg .pp-acts{display:flex;gap:22px}
+.msg .pp-acts a,.msg .pp-acts button{border:0;background:none;padding:0 0 2px;font-size:14px;color:var(--lx);cursor:pointer;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.3)}
+.msg .pp-acts a:hover,.msg .pp-acts button:hover{border-bottom-color:var(--lx)}
+#tts-voice,#tts-voice-zh{background:none;border:1px solid var(--lxb);border-radius:8px;padding:4px 6px;max-width:160px;color:var(--lx2);font:13px var(--ui);cursor:pointer;color-scheme:dark}
+#tts-voice:hover,#tts-voice-zh:hover{color:var(--lx);background:var(--lxb)}
+#tts-voice[hidden],#tts-voice-zh[hidden]{display:none}
+#tts-state{color:var(--lx3)}
+/* 讲解栏 */
+.explain{flex:none;width:clamp(320px,34%,520px);border-left:1px solid var(--lxb);background:var(--lxp);display:flex;flex-direction:column;min-height:0;color:var(--lx)}
+.explain[hidden]{display:none}
+.ex-head{display:flex;align-items:baseline;gap:10px;padding:14px 16px 10px;border-bottom:1px solid var(--lxb);font-size:13px}
+.ex-head b{font-size:14px}
+.ex-head #ex-tip{color:var(--lx3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#ex-list{position:relative;flex:1;overflow-y:auto;padding:10px 16px 70vh}
+.ex-empty{color:var(--lx3);font-size:13.5px;line-height:1.7;margin:18px 0}
+/* 讲解卡片连成一列：当前句亮、左边金线，读过的变淡，指上去变清楚 */
+.excard{padding:12px 0 14px;opacity:.42;transition:opacity .6s ease}
+.excard+.excard{border-top:1px solid var(--lxb)}
+.excard.cur,.excard:hover{opacity:1}
+.excard .en{font-family:var(--serif);font-size:16.5px;line-height:1.55;border-left:3px solid rgba(255,255,255,.18);padding-left:10px;margin-left:-13px;transition:border-color .6s}
+.excard.cur .en{border-left-color:var(--lxg)}
+.excard .zh{margin-top:8px;font-size:15px;line-height:1.7;color:var(--lx2)}
+.excard .k{color:var(--lx3);font-size:12.5px}
+.excard .notes{margin:8px 0 0;padding:8px 12px 8px 26px;background:rgba(232,200,138,.08);border-radius:8px;font-size:13.5px;line-height:1.65;color:var(--lx2)}
+.excard .notes li{margin:2px 0}
+.excard .words{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.excard .words li{display:flex;align-items:baseline;gap:8px;font-size:13.5px}
+.excard .wd{border:0;background:none;padding:0;font:600 15px var(--serif);color:var(--lx);cursor:pointer}
+.excard .wd:hover{color:var(--lxg)}
+.excard .ipa{font-family:"Doulos SIL","Charis SIL","Lucida Grande",var(--ui);color:var(--lx2);font-size:13px;white-space:nowrap}
+.excard .m{color:var(--lx2);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 目录抽屉 */
+.drawer{position:fixed;top:0;bottom:0;left:0;width:340px;max-width:86vw;background:var(--lxp);border-right:1px solid var(--lxb);z-index:30;overflow:auto;transform:translateX(-105%);transition:transform .2s ease;box-shadow:0 8px 40px rgba(0,0,0,.45);color:var(--lx2)}
+.drawer.open{transform:none}
+.drawer h4{margin:0;padding:18px 18px 8px;font-size:13px;color:var(--lx3);font-weight:500;letter-spacing:.06em}
+.drawer .it{display:flex;gap:10px;padding:8px 18px;cursor:pointer;font-size:14px;align-items:baseline;border-left:3px solid transparent}
+.drawer .it:hover{background:rgba(255,255,255,.06);color:var(--lx)}
+.drawer .it.on{border-left-color:var(--lxg);background:rgba(232,200,138,.08);color:var(--lx);font-weight:600}
+.drawer .it .pg2{margin-left:auto;color:var(--lx3);font-size:12px;font-variant-numeric:tabular-nums}
+.drawer .none{padding:0 18px;color:var(--lx3)}
+/* Aa 面板：字号 · 语速 · 思考时间 */
+.menu{position:fixed;z-index:50;top:56px;right:16px;background:var(--lxp);border:1px solid var(--lxb);border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.45);padding:12px 16px;width:310px;font-size:13.5px;color:var(--lx2)}
+.menu[hidden]{display:none}
+.menu .r{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}
+.menu .r>span:first-child{color:var(--lx3)}
+.menu .step{display:flex;align-items:center;gap:2px}
+.menu .step b{min-width:4em;text-align:center;font-weight:500;color:var(--lx);font-variant-numeric:tabular-nums}
+.menu .seg{display:flex;gap:2px}
+.menu .seg button{border:0;background:none;padding:4px 9px;border-radius:6px;cursor:pointer;color:var(--lx3);font-size:13px}
+.menu .seg button.on{color:var(--lx);background:rgba(255,255,255,.12)}
+.menu .k{margin:8px 0 0;color:var(--lx3);font-size:12px;line-height:1.65}
+.menu .pbar{height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden;margin:10px 0 4px}
+.menu .pbar b{display:block;height:100%;background:var(--lxg);transition:width .6s}
+.menu .btn2{border:1px solid var(--lxb);background:none;color:var(--lx2);border-radius:8px;padding:5px 14px;cursor:pointer;font-size:13px}
+.menu .btn2.pri{background:var(--lxg);border-color:var(--lxg);color:#1b1a18;font-weight:600}
+.menu .btn2:disabled{opacity:.5;cursor:default}
+.menu .warn{color:#e8a08a}
+#b-all.on{color:var(--lxg)}
+.toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:20px;font-size:13px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:.92}
+@media (max-width:900px){
+  .rd{flex-direction:column}
+  .lx-left{max-width:calc(100% - 32px - 440px)} .lx-top .lx-t{display:none}
+  #tts-voice,#tts-voice-zh{max-width:110px}
+  .status{left:16px;right:16px;bottom:calc(32% + 70px)} .rd.ex-on .status{bottom:14px}
+  .explain{width:auto;height:42vh;border-left:0;border-top:1px solid var(--lxb)}
+  .sp{font-size:calc(22px * var(--k))}
+  /* 正文在上、译文在下，分区不叠放；讲解栏开着时译文已在讲解卡片里，右栏收起，正文用满 */
+  .sub{bottom:calc(32% + 64px);-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 80%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 80%,transparent)}
+  .lx-side{height:32%}
+  .rd.ex-on .sub{bottom:0;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 72%,transparent 90%);mask-image:linear-gradient(transparent,#000 14%,#000 72%,transparent 90%)}
+  .rd.ex-on .lx-side{display:none}
+  .rd.mode-zh .sub{bottom:0;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 72%,transparent 90%);mask-image:linear-gradient(transparent,#000 14%,#000 72%,transparent 90%)}
+  .rd.mode-zh .status{bottom:14px}
+}
+/* 语调层：画在当前段落里、字的后面（library/static/reader.js「语调」） */
+.sp.here{isolation:isolate}
+.sp .tone{position:absolute;left:0;top:0;z-index:-1;overflow:visible;pointer-events:none}
+/* 语调线退到正文后面当背景：淡灰白细线，不和逐词点亮、难词注释抢注意 */
+.tone .tc{fill:none;stroke:#fff;stroke-width:1.5;stroke-opacity:.22;stroke-linecap:round;stroke-linejoin:round}
+.tone .tc-soft{fill:none;stroke:#fff;stroke-opacity:.05;stroke-linecap:round;stroke-linejoin:round}
+.tone .tn{fill:var(--lxg);fill-opacity:.6}
+.tone .td{fill:#fff;fill-opacity:.7}
+.tone .tdot{fill:#fff;fill-opacity:.85}
+.tone .tdot.weak{fill-opacity:.4}
+.tone .tm{fill:rgba(255,255,255,.7);font-family:var(--ui)}
+.tone .tm.ar,.tone .tm.br{fill:var(--lxg)}
+.tone .tm.odd{fill:var(--lx3)}
+.tone .tm.tb{fill:var(--lxg);fill-opacity:.75;font-size:.6em;letter-spacing:.02em}
+.tone .tm.tb.nuc{fill-opacity:1}
+.tone .tm.lk{fill:rgba(255,255,255,.5);font-size:.8em}
+.tone .tbeat{fill:var(--lxg);fill-opacity:.55}
+/* 讲解卡片里的语调说明 */
+.excard .tnotes{list-style:none;margin:10px 0 0;padding:8px 12px;border-left:2px solid rgba(232,200,138,.35);font-size:13px;line-height:1.65;color:var(--lx2)}
+.excard .tnotes li{margin:3px 0}
+.excard .tnotes .tk{font-style:normal;display:inline-block;min-width:3.4em;margin-right:6px;color:var(--lxg);font-size:12px}
+.excard .tnotes .ref{margin-left:6px;color:var(--lx3);font-size:11.5px}

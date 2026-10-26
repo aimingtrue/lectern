@@ -1,0 +1,17 @@
+{"status": "OK", "num_results": 3, "results": {"bestsellers_date": "2030-01-04", "published_date": "2030-01-19",
+ "published_date_description": "latest", "previous_published_date": "2030-01-12", "next_published_date": "",
+ "lists": [
+  {"list_id": 704, "list_name": "Combined Print and E-Book Fiction", "list_name_encoded": "combined-print-and-e-book-fiction",
+   "display_name": "Combined Print & E-Book Fiction", "updated": "WEEKLY",
+   "books": [
+    {"rank": 1, "rank_last_week": 2, "weeks_on_list": 12, "title": "SAMPLE NOVEL", "author": "Jane Sample",
+     "primary_isbn10": "0306406152", "primary_isbn13": "9780306406157", "publisher": "X"},
+    {"rank": 2, "rank_last_week": 0, "weeks_on_list": 1, "title": "EBOOK ONLY MATCH", "author": "Ann Other",
+     "primary_isbn10": "", "primary_isbn13": "9780000000002", "isbns": [{"isbn10": "", "isbn13": "9780804429573"}]},
+    {"rank": 3, "rank_last_week": 0, "weeks_on_list": 1, "title": "NOT IN THE LIBRARY", "author": "Nobody Here",
+     "primary_isbn13": "9781111111113"}]},
+  {"list_id": 708, "list_name": "Combined Print and E-Book Nonfiction", "list_name_encoded": "combined-print-and-e-book-nonfiction",
+   "books": [{"rank": 1, "weeks_on_list": 40, "title": "TRUE STORY", "author": "Tara Sample", "primary_isbn13": "9781234567897"}]},
+  {"list_id": 999, "list_name": "Graphic Books and Manga", "list_name_encoded": "graphic-books-and-manga",
+   "books": [{"rank": 1, "weeks_on_list": 3, "title": "SOME MANGA", "author": "X", "primary_isbn13": "9780000000019"}]}
+ ]}}

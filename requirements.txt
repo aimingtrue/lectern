@@ -1,0 +1,10 @@
+# 书库服务（.venv）。版本锁定在实测可用的组合；升级时改这里、跑全部测试再提交。
+fastapi==0.142.2
+starlette==1.7.0
+uvicorn==0.54.0
+pymupdf==1.28.2
+httpx==0.28.1
+markdown==3.11
+opencc-python-reimplemented==0.1.7
+numpy==2.5.4
+pypinyin==0.55.0

@@ -1,0 +1,168 @@
+{
+  "_": "Voice catalog. A voice is installed when data/voice/<id>/ holds ref.wav + ref.txt (see tools/add_voice.py). This repo ships NO cloned human voices: the entries below are either synthetic child voices generated from a text description, or a placeholder for a recording you make yourself. Add your own entries here. gender = m/f; accent = us/uk/other; age: child marks a synthetic child voice.",
+  "_cast": "cast_order = preference order when assigning voices to characters (library/speech.py). Empty by default: fill it with your own voice ids, best first.",
+  "cats": [
+    {
+      "id": "professor",
+      "name": "学者教授"
+    },
+    {
+      "id": "narrator",
+      "name": "纪录片 / 配音"
+    },
+    {
+      "id": "actor",
+      "name": "影视明星"
+    },
+    {
+      "id": "audiobook",
+      "name": "有声书 / 朗诵"
+    },
+    {
+      "id": "news",
+      "name": "新闻主播"
+    },
+    {
+      "id": "host",
+      "name": "主持人 / 播客"
+    },
+    {
+      "id": "speaker",
+      "name": "演讲 / 企业家"
+    },
+    {
+      "id": "writer",
+      "name": "作家"
+    },
+    {
+      "id": "child",
+      "name": "合成童声"
+    }
+  ],
+  "cast_order": [],
+  "voices": [
+    {
+      "id": "mine",
+      "name": "My own voice",
+      "lang": "en",
+      "cat": "audiobook",
+      "note": "Your own recording. See README: record ~40s, drop it in, run tools/add_voice.py.",
+      "gender": "m",
+      "accent": "us"
+    },
+    {
+      "id": "girl-a",
+      "name": "女孩 · 8 岁（美式）",
+      "lang": "en",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "f",
+      "accent": "us",
+      "age": "child"
+    },
+    {
+      "id": "girl-b",
+      "name": "女孩 · 12 岁（英式）",
+      "lang": "en",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "f",
+      "accent": "uk",
+      "age": "child"
+    },
+    {
+      "id": "girl-c",
+      "name": "小女孩 · 5 岁（美式）",
+      "lang": "en",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "f",
+      "accent": "us",
+      "age": "child"
+    },
+    {
+      "id": "boy-a",
+      "name": "男孩 · 8 岁（美式）",
+      "lang": "en",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "m",
+      "accent": "us",
+      "age": "child"
+    },
+    {
+      "id": "boy-b",
+      "name": "男孩 · 10 岁（英式）",
+      "lang": "en",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "m",
+      "accent": "uk",
+      "age": "child"
+    },
+    {
+      "id": "boy-c",
+      "name": "小男孩 · 6 岁（美式）",
+      "lang": "en",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "m",
+      "accent": "us",
+      "age": "child"
+    },
+    {
+      "id": "zh-girl-a",
+      "name": "女孩 · 8 岁（普通话）",
+      "lang": "zh",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "f",
+      "age": "child"
+    },
+    {
+      "id": "zh-girl-b",
+      "name": "女孩 · 12 岁（普通话）",
+      "lang": "zh",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "f",
+      "age": "child"
+    },
+    {
+      "id": "zh-girl-c",
+      "name": "小女孩 · 5 岁（普通话）",
+      "lang": "zh",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "f",
+      "age": "child"
+    },
+    {
+      "id": "zh-boy-a",
+      "name": "男孩 · 8 岁（普通话）",
+      "lang": "zh",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "m",
+      "age": "child"
+    },
+    {
+      "id": "zh-boy-b",
+      "name": "男孩 · 10 岁（普通话）",
+      "lang": "zh",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "m",
+      "age": "child"
+    },
+    {
+      "id": "zh-boy-c",
+      "name": "小男孩 · 6 岁（普通话）",
+      "lang": "zh",
+      "cat": "child",
+      "note": "Qwen3-TTS VoiceDesign 按文字描述合成，不是真人",
+      "gender": "m",
+      "age": "child"
+    }
+  ]
+}

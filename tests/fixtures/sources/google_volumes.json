@@ -1,0 +1,11 @@
+{"kind": "books#volumes", "totalItems": 2, "items": [
+ {"id": "other", "volumeInfo": {"title": "A Different Book", "industryIdentifiers": [{"type": "ISBN_13", "identifier": "9781111111113"}],
+   "description": "Wrong book."}},
+ {"id": "abc123", "volumeInfo": {"title": "Sample Novel", "authors": ["Jane Sample"], "publishedDate": "2019-05-07",
+   "description": "A <b>sample</b> description, kept verbatim.", "language": "en",
+   "industryIdentifiers": [{"type": "ISBN_10", "identifier": "0306406152"}, {"type": "ISBN_13", "identifier": "9780306406157"}],
+   "categories": ["Fiction / Literary", "Fiction / Family Life"],
+   "imageLinks": {"smallThumbnail": "http://books.google.com/books/content?id=abc123&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+                  "thumbnail": "http://books.google.com/books/content?id=abc123&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"},
+   "infoLink": "https://books.google.com/books?id=abc123&source=gbs_api"}}
+]}

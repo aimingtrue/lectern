@@ -1,0 +1,19 @@
+{"id": 77, "title": "豆瓣2030年度读书榜单", "widgets": [
+ {"id": 1, "idx": 0, "kind": 2, "title": "", "payload": {}, "source_data": null},
+ {"id": 2, "idx": 1, "kind": 1, "title": "外国文学（小说）", "payload": {},
+  "source_data": {"subject_collection": {"id": 900, "title": "豆瓣2030年度外国文学（小说类）", "subject_type": "book", "show_rank": true},
+   "subject_collection_items": [
+    {"card_subtitle": "[韩]作者丙 / 某品牌 / 某某出版社", "id": "30000001", "title": "样书丙", "url": "https://book.douban.com/subject/30000001/"},
+    {"card_subtitle": "作者丁 / 某某出版社", "id": "30000002", "title": "不在书库的书", "url": "https://book.douban.com/subject/30000002/"}]}},
+ {"id": 3, "idx": 2, "kind": 3, "title": "两个子榜",
+  "payload": {"items": [{"title": "历史文化"}, {"title": ""}]},
+  "source_data": [
+   {"subject_collection": {"id": 901, "title": "豆瓣2030年度历史·文化图书", "subject_type": "book", "show_rank": true},
+    "subject_collection_items": [{"card_subtitle": "作者戊/口述 某人/撰写 / 某某出版社", "id": "30000003", "title": "样书戊"}]},
+   {"subject_collection": {"id": 902, "title": "豆瓣2030年度社会·纪实图书", "subject_type": "book", "show_rank": true},
+    "subject_collection_items": [{"card_subtitle": "作者己 / 某某出版社", "id": "30000004", "title": "样书己"}]}]},
+ {"id": 4, "idx": 3, "kind": 4, "title": "年度作者", "payload": {}, "source_data": [{"name": "某作者"}]},
+ {"id": 5, "idx": 4, "kind": 1, "title": "年度电影", "payload": {},
+  "source_data": {"subject_collection": {"id": 903, "title": "不是图书", "subject_type": "movie"},
+   "subject_collection_items": [{"title": "某电影"}]}}
+]}

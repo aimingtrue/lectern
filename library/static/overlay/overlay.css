@@ -1,0 +1,73 @@
+/* 视频图层：1920×1080、透明底，叠在讲堂成片上。颜色和字体跟朗读页一致（reader.css：#151413 底、#e8c88a 金、Charter 正文）。
+   不用 CSS 过渡：每一帧的样子只由 OV.seek(t) 决定，逐帧截图才稳定 */
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;
+  --gold:#e8c88a;--dim:rgba(255,255,255,.42);--panel:rgba(21,20,19,.8);--line:rgba(255,255,255,.1)}
+#ov{position:absolute;inset:0}
+.pane{position:absolute;box-sizing:border-box;background:var(--panel);border:1px solid var(--line);border-radius:22px}
+
+/* 正文 */
+.read{padding:30px 44px 0}
+.eyebrow{font:600 15px/1 -apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.view{position:absolute;left:44px;right:44px;top:70px;bottom:150px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(transparent,#000 14%,#000 80%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 80%,transparent)}
+.flow{position:absolute;left:0;right:0;top:0}
+.flow p{margin:0 0 .7em;font-family:Charter,"Iowan Old Style",Georgia,serif;font-size:34px;line-height:1.62;text-indent:1.4em;text-wrap:pretty}
+.flow .w{opacity:.24}
+.flow .g{text-decoration-line:underline;text-decoration-thickness:2px;text-underline-offset:6px;text-decoration-color:transparent}
+.flow .g.on{color:var(--gold);text-decoration-color:var(--gold)}
+
+/* 页边注释：正文下方一条 */
+.note{position:absolute;left:44px;right:44px;bottom:30px;height:96px;display:flex;flex-direction:column;justify-content:center;gap:6px;
+  border-left:3px solid var(--gold);padding-left:20px;opacity:0}
+.note .term{font-family:Charter,Georgia,serif;font-style:italic;font-size:28px;color:var(--gold);line-height:1.15}
+.note .def{font-size:23px;line-height:1.35;color:rgba(255,255,255,.88)}
+
+/* 人物网 */
+.cast{padding:22px 30px}
+.cast svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
+.cast .lk{stroke:#fff;stroke-width:1.4;fill:none}
+.cast .rel,.cast .nm{paint-order:stroke;stroke:#151413;stroke-width:6px;stroke-linejoin:round;text-anchor:middle}   /* 字压在连线上也读得清 */
+.cast .rel{font:500 15px -apple-system,BlinkMacSystemFont,sans-serif;fill:var(--gold)}
+.cast .nm{font:600 18px -apple-system,BlinkMacSystemFont,sans-serif}
+.cast .who{position:absolute;left:30px;right:30px;bottom:18px;font-size:19px;line-height:1.3;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cast .who b{color:var(--gold);font-weight:600;margin-right:10px}
+.cast .eyebrow{position:absolute;left:30px;top:22px}
+
+/* reader 布局：朗读页的两栏（static/reader.css），盖在漫画背景上。背景压暗但看得见 */
+#ov.rdr{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif}
+.rdr .scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,13,12,.72) 0%,rgba(14,13,12,.58) 45%,rgba(14,13,12,.66) 60%,rgba(14,13,12,.8) 100%),
+  linear-gradient(180deg,rgba(14,13,12,.45),transparent 22%,transparent 78%,rgba(14,13,12,.5))}
+.rdr .top{position:absolute;left:110px;top:40px;display:flex;gap:16px;align-items:baseline;font:500 17px/1 -apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:.06em;color:rgba(255,255,255,.42)}
+.rdr .top b{font-weight:500;color:rgba(255,255,255,.72)}
+.rdr .lv,.rdr .rv{position:absolute;overflow:hidden}
+.rdr .lv{-webkit-mask-image:linear-gradient(transparent,#000 16%,#000 70%,transparent 94%);mask-image:linear-gradient(transparent,#000 16%,#000 70%,transparent 94%)}
+.rdr .rv{top:96px;height:470px;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 70%,transparent)}
+.rdr .flow{position:absolute;left:0;right:0;top:0}
+.rdr .flow p{margin:0 0 .9em;font-family:Charter,"Iowan Old Style",Georgia,serif;font-weight:600;font-size:40px;line-height:2.05;text-indent:1.6em;text-wrap:pretty;
+  text-shadow:0 1px 3px rgba(0,0,0,.55)}
+.rdr .w,.rdr .wt{position:relative}
+.rdr .w.now{text-shadow:0 0 16px rgba(255,232,190,.6),0 0 2px rgba(255,255,255,.5)}
+.rdr .w.gl.lit{text-decoration:underline 1.5px rgba(232,200,138,.6);text-underline-offset:.2em}
+.rdr .gt{position:absolute;left:50%;bottom:calc(100% - .32em);transform:translateX(-50%);white-space:nowrap;text-indent:0;
+  font:500 17px/1 "PingFang SC",-apple-system,sans-serif;color:var(--gold);letter-spacing:.04em;opacity:0;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.rdr .list{position:absolute;left:0;right:0;top:0}
+.rdr .si{padding-top:.3em;margin-bottom:1.1em;opacity:0;font:400 27px/1.7 "PingFang SC",-apple-system,sans-serif;color:rgba(255,255,255,.78);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.rdr .si.cur{color:#fff}
+.rdr .si.cur .zg{text-decoration:underline 1.5px rgba(232,200,138,.7);text-underline-offset:.3em}
+.pane.bare{background:none;border:0}
+.pane.bare .eyebrow{display:none}
+.pane.bare .who{font-size:19px;color:rgba(255,255,255,.7)}
+.rdr .w.gl.on{text-decoration:underline 1.5px rgba(232,200,138,.75);text-underline-offset:.2em}
+/* 英文版右栏下部的词义卡（同 panel 布局的页边注释） */
+.rdr .card{position:absolute;top:790px;height:200px;box-sizing:border-box;padding:22px 26px;border-left:3px solid var(--gold);
+  background:rgba(21,20,19,.55);border-radius:0 14px 14px 0;display:flex;flex-direction:column;justify-content:center;gap:10px;opacity:0}
+.rdr .card .term{font-family:Charter,Georgia,serif;font-style:italic;font-size:34px;line-height:1.15;color:var(--gold);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.rdr .card .def{font-size:25px;line-height:1.4;color:rgba(255,255,255,.9);text-shadow:0 1px 3px rgba(0,0,0,.6)}
+/* 音调线（朗读页 reader.css 的 .tone）：和句子重叠、垫在字下面一层，比朗读页还淡；视频里固定这个样子，别再加亮 */
+.rdr .flow{isolation:isolate}
+.rdr .tone{z-index:-1}
+.rdr .tone .tc{fill:none;stroke:#fff;stroke-width:1.5;stroke-opacity:.14;stroke-linecap:round;stroke-linejoin:round}
+.rdr .tone .tc-soft{fill:none;stroke:#fff;stroke-opacity:.03;stroke-linecap:round;stroke-linejoin:round}
+.rdr .tone .tn{fill:var(--gold);fill-opacity:.35}
+.rdr .tone .td{fill:#fff;fill-opacity:.4}

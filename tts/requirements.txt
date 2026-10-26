@@ -1,0 +1,8 @@
+# 朗读音色服务（.venv-tts，Apple Silicon）。mlx-qwen3-asr：逐词对齐（Qwen3-ForcedAligner）和 tools/add_voice.py 的自动转写。
+mlx==0.32.3
+mlx-metal==0.32.3
+mlx-audio==0.5.7
+mlx-qwen3-asr==0.4.4
+fastapi==0.142.2
+uvicorn==0.54.0
+numpy==2.5.3
